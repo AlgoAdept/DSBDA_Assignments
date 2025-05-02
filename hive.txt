@@ -1,0 +1,31 @@
+su hduser
+
+cd
+start-dfs.sh
+start-yarn.sh
+
+cd /usr/local/hive/bin
+./hive
+
+
+create database if not exists f2;
+
+
+create table flights(flight_id INT, flight_date STRING, origin STRING,destiantion STRING,dep_delay INT,arr_delay INT) row format delimited fields terminated by ',' stored as textfile;
+
+
+insert into table flights values(1001,'12/2/24','JK','MM',12,15);
+
+
+alter table flights add columns(flight_duration INT);
+
+insert overwrite table flights
+select flight_id,flight_date,origin,destination,dep_delay,arr_delay,case when flight_id=1001 then 360 else flight_duration end as flight_duration from flights;
+
+
+create external table external_flights(airport_code STRING,name STRING,city STRING,state STRING) row format delimited fields terminated by ',' stored as textfile;
+
+select f.flight,f.origin,a.origin as origin from flights f join external_airport a on f.origin = a.origin;
+
+select flight_date , avg(dep_delay) as avg_dep_delay from flights where flight_date like '2008%'
+group by flight_date;
